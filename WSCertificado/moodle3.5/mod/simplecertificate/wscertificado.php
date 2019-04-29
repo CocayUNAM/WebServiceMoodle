@@ -68,7 +68,7 @@ function json_pdf_from_path($path = '',$emal,$course_name,$certificate_name){
     $size = filesize($path);
     $content = fread($handle,$size);
     $content = base64_encode($content);
-    $array = array("mensaje" => "NULL","correo" => $emal,"nombre_curso" =>$course_name, "nombre_archivo"=>$certificatename,"bytespdf" => $content);
+    $array = array("mensaje" => "NULL","correo" => $emal,"nombre_curso" =>$course_name, "nombre_archivo"=>base64_encode($certificatename),"bytespdf" => $content);
     return json_encode($array);
 }
 /**
