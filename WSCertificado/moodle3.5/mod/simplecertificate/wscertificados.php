@@ -27,51 +27,72 @@
 por nombre y correo electronico
 */
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-#$code = required_param('code', PARAM_TEXT); // Issued Code.
-/* Este es mi código */
-//$_GET['variable']
-//$email = required_param('email',PARAM_TEXT);
-//$nombre_curso = required_param('nc',PARAM_TEXT);
 
-$nombre_curso = $_GET['nc'];
-$email = $_GET['email'];
+
+$json_p = $_POST['json'];
+$lista = json_decode($json_p,true);
+$cantidad = $lista['cuenta'];
+
 $mysqli = new mysqli('localhost','root','','moodle');
-$resultado = $mysqli->query("SELECT * FROM mdl_user WHERE email = '{$email}';");
-$id = $resultado->fetch_assoc()['id'];
-$resultado2 = $mysqli->query("SELECT * FROM mdl_simplecertificate_issues WHERE userid = {$id} AND coursename = '{$nombre_curso}';");
-$row = $resultado2->fetch_assoc();
-$code = $row['code'];
-$tiempo = $row['timecreated']
-$nombre_archivo = $row['certificatename'];
+$zip = new ZipArchive;
+$zip->open('test_folder_change.zip', ZipArchive::CREATE);
+
+
+while ($i < $cantidad){
+    $a = "correo".$i;
+    $b = "curso".$i;
+    $c = "tiempo".$i;
+    inicio($mysql,$lista[$a],$lista[$b],$lista[$c]);
+    $i++;
+}
+
+$zip->close();
+$handle = fopen('test_folder_change.zip', 'rt');
+$content = fread($handle,$size);
+$content = base64_encode($content);
+echo json_encode(array("zip" => base64_encode($content)));
+$handle->close();
 $mysqli->close();
-
-#$code = "5bfee0a2-1288-4412-badb-144e84f89644";
-
-$issuedcert = $DB->get_record("simplecertificate_issues", array('code' => $code));
-if (!$issuedcert) {
-    print_error(get_string('issuedcertificatenotfound', 'simplecertificate'));
-} else {
-    send_certificate_file($issuedcert,$email,$nombre_curso,$nombre_archivo);
+/**
+* Funcion que llama mete al arreglo un solo arreglo asociado a un certificados
+* @param $mysql conexiona la base de datos.
+* @param $email correo de usuario
+* @param $nombre_curso nombre de curso
+* @param $tiempo_t tiempo de creacion de archivo a actualizar
+* @param $array arreglo que contendra la informacion de los archivos a enviar
+*/
+function inicio($mysql,$email,$nombre_curso,$tiempo_t){
+    $resultado = $mysqli->query("SELECT * FROM mdl_user WHERE email = '{$email}';");
+    $id = $resultado->fetch_assoc()['id'];
+    $resultado2 = $mysqli->query("SELECT * FROM mdl_simplecertificate_issues WHERE userid = {$id} AND coursename = '{$nombre_curso}';");
+    $row = $resultado2->fetch_assoc();
+    $code = $row['code'];
+    $tiempo = $row['timecreated'];
+    $nombre_archivo = $row['certificatename'];
+    if((int)$tiempo_t >= (int)$tiempo){
+        return;
+    }
+    aplicar($code,$email,$nombre_curso,$nombre_archivo);
 }
 /**
-* Funcion que devuelve un json que contiene un certificado de un usuario codificado en base 64
-* @param $path ruta del archivo
-* @param $emal correo de usuario
-* @param $course_name nombre de curso
-* @param $certificate_name nombre de certificado 
-* @return json con un certificado de usuario codificado en base 64
+* Funcion que mete al arreglo un arreglo asociado a un certificado.
+* @param $code codigo de certificado
+* @param $email correo de usuario
+* @param $nombre_curso nombre de curso
+* @param $nombre_archivo nombre de certificado
+* @param $arr arreglo que contendra la informacion de los archivos a enviar
 */
-function json_pdf_from_path($path = '',$emal,$course_name,$certificate_name,$tiempo){
-    if($path == ''){
-        return json_encode(array("mensaje"=>"Archivo no encontrado"));
+function aplicar($code,$email,$nombre_curso,$nombre_archivo){
+    $issuedcert = $DB->get_record("simplecertificate_issues", array('code' => $code));
+    if (!$issuedcert) {
+        print_error(get_string('issuedcertificatenotfound', 'simplecertificate'));
+    } else {
+        $elem = get_certificate_file($issuedcert,$email,$nombre_curso,$nombre_archivo);
+        array_push($arr, $elem);
     }
-    $handle = fopen($path,"rt");
-    $size = filesize($path);
-    $content = fread($handle,$size);
-    $content = base64_encode($content);
-    $array = array("mensaje" => "NULL","correo" => $emal,"nombre_curso" =>$course_name, "nombre_archivo"=>base64_encode($certificate_name),"bytespdf" => $content, "tiempo" => $tiempo);
-    return json_encode($array);
 }
+
+#$code = "5bfee0a2-1288-4412-badb-144e84f89644";
 /**
 * Funcion que envía un certificado codificado en un json
 * @param $issuedcert clase asociada a un certificado expedido o por expedir
@@ -79,7 +100,7 @@ function json_pdf_from_path($path = '',$emal,$course_name,$certificate_name,$tie
 * @param $course_name nombre de curso
 * @param $certificate_name nombre de certificado
 */
-function send_certificate_file(stdClass $issuedcert, $emal,$course_name,$certificate_name,$tiempo) {
+function get_certificate_file(stdClass $issuedcert, $emal,$course_name,$certificate_name,$tiempo) {
     global $CFG, $USER, $DB, $PAGE;
 
     if ($issuedcert->haschange) {
@@ -122,6 +143,7 @@ function send_certificate_file(stdClass $issuedcert, $emal,$course_name,$certifi
     //copy_content_to_temp esta en stored file
     $path = $file->copy_content_to_temp("/SICECD");
     chmod($path,777);
-    echo json_pdf_from_path($path,$emal,$course_name,$certificate_name,$tiempo);
-    /*manipular el archivo(cambiar el nombre y permisos) y enviarlo*/
+    $base = basename($path);
+    global $zip;
+    $zip->addFile($path, '{$course_name}/{$emal}/{$base}');
 }
