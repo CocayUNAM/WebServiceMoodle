@@ -23,45 +23,41 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/*select * from mdl_simplecertificate_issues t1,mdl_user t2 where code='5cbf62b0-3384-44db-be48-110d7f000001' AND t1.userid=t2.id;
+/*select * from mdl_simplecertificate_issues t1,mdl_user t2 where code='5cbf62b0-3384-44db-be48-110d7f000001' AND t1.userid=t2.id; fis = new FileInputStream(TEMP_ZIP);
 por nombre y correo electronico
 */
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-
-
+header("Content-type: application/json; charset=utf-8");
 $json_p = $_POST['json'];
 $lista = json_decode($json_p,true);
-$cantidad = $lista['cuenta'];
-
+$cantidad = (int)$lista['cuenta'];
+$i = 0;
 $mysqli = new mysqli('localhost','root','','moodle');
 $zip = new ZipArchive;
-$zip->open('test_folder_change.zip', ZipArchive::CREATE);
-
-
+$r = $zip->open('test_folder_change.zip', ZipArchive::CREATE) === TRUE;
 while ($i < $cantidad){
     $a = "correo".$i;
     $b = "curso".$i;
     $c = "tiempo".$i;
-    inicio($mysql,$lista[$a],$lista[$b],$lista[$c]);
+    inicio($lista[$a],$lista[$b],$lista[$c]);
     $i++;
 }
 
 $zip->close();
 $handle = fopen('test_folder_change.zip', 'rt');
+$size = filesize('test_folder_change.zip');
 $content = fread($handle,$size);
 $content = base64_encode($content);
-echo json_encode(array("zip" => base64_encode($content)));
-$handle->close();
+echo json_encode(array("zip" => $content));
 $mysqli->close();
 /**
-* Funcion que llama mete al arreglo un solo arreglo asociado a un certificados
-* @param $mysql conexiona la base de datos.
+* Funcion que llama mete al arreglo un solo arreglo asociado a un certificado
 * @param $email correo de usuario
 * @param $nombre_curso nombre de curso
 * @param $tiempo_t tiempo de creacion de archivo a actualizar
-* @param $array arreglo que contendra la informacion de los archivos a enviar
 */
-function inicio($mysql,$email,$nombre_curso,$tiempo_t){
+function inicio($email,$nombre_curso,$tiempo_t){
+    global $mysqli;
     $resultado = $mysqli->query("SELECT * FROM mdl_user WHERE email = '{$email}';");
     $id = $resultado->fetch_assoc()['id'];
     $resultado2 = $mysqli->query("SELECT * FROM mdl_simplecertificate_issues WHERE userid = {$id} AND coursename = '{$nombre_curso}';");
@@ -72,6 +68,7 @@ function inicio($mysql,$email,$nombre_curso,$tiempo_t){
     if((int)$tiempo_t >= (int)$tiempo){
         return;
     }
+    //echo "APLICO\n";
     aplicar($code,$email,$nombre_curso,$nombre_archivo);
 }
 /**
@@ -83,12 +80,12 @@ function inicio($mysql,$email,$nombre_curso,$tiempo_t){
 * @param $arr arreglo que contendra la informacion de los archivos a enviar
 */
 function aplicar($code,$email,$nombre_curso,$nombre_archivo){
+    global $DB;
     $issuedcert = $DB->get_record("simplecertificate_issues", array('code' => $code));
     if (!$issuedcert) {
         print_error(get_string('issuedcertificatenotfound', 'simplecertificate'));
     } else {
-        $elem = get_certificate_file($issuedcert,$email,$nombre_curso,$nombre_archivo);
-        array_push($arr, $elem);
+        get_certificate_file($issuedcert,$email,$nombre_curso,$nombre_archivo);
     }
 }
 
@@ -100,7 +97,7 @@ function aplicar($code,$email,$nombre_curso,$nombre_archivo){
 * @param $course_name nombre de curso
 * @param $certificate_name nombre de certificado
 */
-function get_certificate_file(stdClass $issuedcert, $emal,$course_name,$certificate_name,$tiempo) {
+function get_certificate_file(stdClass $issuedcert, $emal,$course_name,$certificate_name) {
     global $CFG, $USER, $DB, $PAGE;
 
     if ($issuedcert->haschange) {
@@ -143,7 +140,8 @@ function get_certificate_file(stdClass $issuedcert, $emal,$course_name,$certific
     //copy_content_to_temp esta en stored file
     $path = $file->copy_content_to_temp("/SICECD");
     chmod($path,777);
-    $base = basename($path);
+    //$base = basename($path);
     global $zip;
-    $zip->addFile($path, '{$course_name}/{$emal}/{$base}');
+    $zip->addFile($path, "{$course_name}/{$emal}/{$certificate_name}.pdf");
+    //echo "ADD to zip";
 }
