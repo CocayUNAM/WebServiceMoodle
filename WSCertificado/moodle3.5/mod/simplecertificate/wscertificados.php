@@ -35,6 +35,7 @@ $i = 0;
 $mysqli = new mysqli('localhost','root','','moodle');
 $zip = new ZipArchive;
 $r = $zip->open('test_folder_change.zip', ZipArchive::CREATE) === TRUE;
+$arr = array();
 while ($i < $cantidad){
     $a = "correo".$i;
     $b = "curso".$i;
@@ -48,7 +49,8 @@ $handle = fopen('test_folder_change.zip', 'rt');
 $size = filesize('test_folder_change.zip');
 $content = fread($handle,$size);
 $content = base64_encode($content);
-echo json_encode(array("zip" => $content));
+echo json_encode(array("zip" => $content) + $arr);
+unlink('test_folder_change.zip');
 $mysqli->close();
 /**
 * Funcion que llama mete al arreglo un solo arreglo asociado a un certificado
@@ -57,6 +59,10 @@ $mysqli->close();
 * @param $tiempo_t tiempo de creacion de archivo a actualizar
 */
 function inicio($email,$nombre_curso,$tiempo_t){
+    global $arr;
+    if(!array_key_exists($nombre_curso, $arr)){
+        $arr += array($nombre_curso => array());
+    }
     global $mysqli;
     $resultado = $mysqli->query("SELECT * FROM mdl_user WHERE email = '{$email}';");
     $id = $resultado->fetch_assoc()['id'];
@@ -69,7 +75,7 @@ function inicio($email,$nombre_curso,$tiempo_t){
         return;
     }
     //echo "APLICO\n";
-    aplicar($code,$email,$nombre_curso,$nombre_archivo);
+    aplicar($code,$email,$nombre_curso,$nombre_archivo,$tiempo);
 }
 /**
 * Funcion que mete al arreglo un arreglo asociado a un certificado.
@@ -79,7 +85,7 @@ function inicio($email,$nombre_curso,$tiempo_t){
 * @param $nombre_archivo nombre de certificado
 * @param $arr arreglo que contendra la informacion de los archivos a enviar
 */
-function aplicar($code,$email,$nombre_curso,$nombre_archivo){
+function aplicar($code,$email,$nombre_curso,$nombre_archivo,$tiempo){
     global $DB;
     $issuedcert = $DB->get_record("simplecertificate_issues", array('code' => $code));
     if (!$issuedcert) {
@@ -97,7 +103,7 @@ function aplicar($code,$email,$nombre_curso,$nombre_archivo){
 * @param $course_name nombre de curso
 * @param $certificate_name nombre de certificado
 */
-function get_certificate_file(stdClass $issuedcert, $emal,$course_name,$certificate_name) {
+function get_certificate_file(stdClass $issuedcert, $emal,$course_name,$certificate_name,$tiempo) {
     global $CFG, $USER, $DB, $PAGE;
 
     if ($issuedcert->haschange) {
@@ -143,5 +149,7 @@ function get_certificate_file(stdClass $issuedcert, $emal,$course_name,$certific
     //$base = basename($path);
     global $zip;
     $zip->addFile($path, "{$course_name}/{$emal}/{$certificate_name}.pdf");
+    global $arr;
+    $arr[$course_name] += array("{$emal}" => $tiempo);
     //echo "ADD to zip";
 }
