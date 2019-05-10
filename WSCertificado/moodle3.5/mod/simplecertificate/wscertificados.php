@@ -91,7 +91,7 @@ function aplicar($code,$email,$nombre_curso,$nombre_archivo,$tiempo){
     if (!$issuedcert) {
         print_error(get_string('issuedcertificatenotfound', 'simplecertificate'));
     } else {
-        get_certificate_file($issuedcert,$email,$nombre_curso,$nombre_archivo);
+        get_certificate_file($issuedcert,$email,$nombre_curso,$nombre_archivo,$tiempo);
     }
 }
 
