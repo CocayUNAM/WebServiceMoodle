@@ -7,5 +7,5 @@ Web Service Moodle-Aplicación
 1. Correr el script SQL del SICECD antes de hacer alguna manipulación de datos en el SICECD.
 1. Modificar las variables en el archivo ClienteCertificadoController.java y CertificadoMasivoController.java llamadas LOCAL, URL, TEMP_ZIP, donde LOCAL guarda la ruta donde se guardarán los certificados, URL_RS la url del WS que sólo trae un certificado, URL_RSM la url del WS que trae más de un certificado y TEMP_ZIP que guarda de forma temporal un ZIP que contiene certificados, todo esto en el SICECD.
 1. Además modificar la expresion cron en CertificadoMasivoController.java para probar, está función se ejecutará en el tiempo que se calendarice.
-1. Correr el SICED, para probar la traída de un certificado simple ir a la url localhost:8080/certificado, ésta url es accesible por cualquier persona.
+1. Correr el SICECD, para probar la traída de un certificado simple ir a la url localhost:8080/certificado, ésta url es accesible por cualquier persona.
 
