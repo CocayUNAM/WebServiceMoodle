@@ -70,12 +70,12 @@ function inicio($email,$nombre_curso,$tiempo_t){
     }
     global $mysqli;
     $resultado = $mysqli->query("SELECT * FROM mdl_user WHERE email = '{$email}';");
-    if(mysqli_num_rows($resultado)==0){
+    if($resultado->num_rows == 0){
         return;
     }
     $id = $resultado->fetch_assoc()['id'];
     $resultado2 = $mysqli->query("SELECT * FROM mdl_simplecertificate_issues WHERE userid = {$id} AND coursename = '{$nombre_curso}';");
-    if(mysqli_num_rows($resultado2)==0){
+    if($resultado2->num_rows == 0){
         return;
     }
     $row = $resultado2->fetch_assoc();
