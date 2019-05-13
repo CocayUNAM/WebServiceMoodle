@@ -40,6 +40,7 @@ while ($i < $cantidad){
     $a = "correo".$i;
     $b = "curso".$i;
     $c = "tiempo".$i;
+    //echo "{$lista[$a]} "."{$lista[$b]} "."{$lista[$c]}";
     inicio($lista[$a],$lista[$b],$lista[$c]);
     $i++;
 }
@@ -49,7 +50,11 @@ $handle = fopen('test_folder_change.zip', 'rt');
 $size = filesize('test_folder_change.zip');
 $content = fread($handle,$size);
 $content = base64_encode($content);
-echo json_encode(array("zip" => $content) + $arr);
+if(count($arr) == 0){
+    json_encode(array("mensaje" => "No hay archivos"));
+} else {
+    echo json_encode(array("zip" => $content) + $arr + array("mensaje" => "NULL"));
+}
 unlink('test_folder_change.zip');
 $mysqli->close();
 /**
@@ -65,8 +70,14 @@ function inicio($email,$nombre_curso,$tiempo_t){
     }
     global $mysqli;
     $resultado = $mysqli->query("SELECT * FROM mdl_user WHERE email = '{$email}';");
+    if(mysqli_num_rows($resultado)==0){
+        return;
+    }
     $id = $resultado->fetch_assoc()['id'];
     $resultado2 = $mysqli->query("SELECT * FROM mdl_simplecertificate_issues WHERE userid = {$id} AND coursename = '{$nombre_curso}';");
+    if(mysqli_num_rows($resultado2)==0){
+        return;
+    }
     $row = $resultado2->fetch_assoc();
     $code = $row['code'];
     $tiempo = $row['timecreated'];
