@@ -22,8 +22,10 @@
     while($row = $result->fetch(PDO::FETCH_ASSOC)) {
       extract($row);
       $post_item = array(
+        'enrolid'=>$enrolid,
         'firstname' => $firstname,
         'lastname' => $lastname,
+        'username'=>$username,
         'email' => $email,
         'institution' => $institution,
         'city' => $city
