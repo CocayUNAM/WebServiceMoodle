@@ -22,13 +22,14 @@
     while($row = $result->fetch(PDO::FETCH_ASSOC)) {
       extract($row);
       $post_item = array(
-        'enrolid'=>$enrolid,
+        'username'=>$username,
         'firstname' => $firstname,
         'lastname' => $lastname,
-        'username'=>$username,
         'email' => $email,
         'institution' => $institution,
-        'city' => $city
+        'city' => $city,
+        'shortname'=>$shortname,
+        'grade'=>$grade
       );
       // Push to "data"
       array_push($posts_arr, $post_item);
