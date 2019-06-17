@@ -4,7 +4,7 @@
   header('Content-Type: application/json');
   header("Content-type: application/json; charset=utf-8");
   include_once '../../config/Database.php';
-  include_once '../../models/Users.php';
+  include_once '../../models/Course.php';
   // Instantiate DB & connect
   $database = new Database();
   $db = $database->connect();
@@ -22,14 +22,8 @@
     while($row = $result->fetch(PDO::FETCH_ASSOC)) {
       extract($row);
       $post_item = array(
-        'username'=>$username,
-        'firstname' => $firstname,
-        'lastname' => $lastname,
-        'email' => $email,
-        'institution' => $institution,
-        'city' => $city,
-        'shortname'=>$shortname,
-        'grade'=>$grade
+        'fullname'=>$fullname,
+        'username'=>$username
       );
       // Push to "data"
       array_push($posts_arr, $post_item);
