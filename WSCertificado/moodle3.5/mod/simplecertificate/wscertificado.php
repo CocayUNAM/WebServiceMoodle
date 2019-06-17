@@ -42,7 +42,6 @@ $resultado2 = $mysqli->query("SELECT * FROM mdl_simplecertificate_issues WHERE u
 $row = $resultado2->fetch_assoc();
 $code = $row['code'];
 $tiempo = $row['timecreated'];
-$nombre_archivo = $row['certificatename'];
 $mysqli->close();
 
 #$code = "5bfee0a2-1288-4412-badb-144e84f89644";
@@ -51,7 +50,7 @@ $issuedcert = $DB->get_record("simplecertificate_issues", array('code' => $code)
 if (!$issuedcert) {
     print_error(get_string('issuedcertificatenotfound', 'simplecertificate'));
 } else {
-    send_certificate_file($issuedcert,$email,$nombre_curso,$nombre_archivo,$tiempo);
+    send_certificate_file($issuedcert,$email,$nombre_curso,$tiempo);
 }
 /**
 * Funcion que devuelve un json que contiene un certificado de un usuario codificado en base 64
@@ -61,7 +60,7 @@ if (!$issuedcert) {
 * @param $certificate_name nombre de certificado 
 * @return json con un certificado de usuario codificado en base 64
 */
-function json_pdf_from_path($path = '',$emal,$course_name,$certificate_name,$tiempo){
+function json_pdf_from_path($path = '',$emal,$course_name,$tiempo){
     if($path == ''){
         return json_encode(array("mensaje"=>"Archivo no encontrado"));
     }
@@ -69,7 +68,7 @@ function json_pdf_from_path($path = '',$emal,$course_name,$certificate_name,$tie
     $size = filesize($path);
     $content = fread($handle,$size);
     $content = base64_encode($content);
-    $array = array("mensaje" => "NULL","correo" => $emal,"nombre_curso" =>$course_name, "nombre_archivo"=>base64_encode($certificate_name),"bytespdf" => $content, "tiempo" => $tiempo);
+    $array = array("mensaje" => "NULL","correo" => $emal,"nombre_curso" =>$course_name,"bytespdf" => $content, "tiempo" => $tiempo);
     return json_encode($array);
 }
 /**
@@ -79,7 +78,7 @@ function json_pdf_from_path($path = '',$emal,$course_name,$certificate_name,$tie
 * @param $course_name nombre de curso
 * @param $certificate_name nombre de certificado
 */
-function send_certificate_file(stdClass $issuedcert, $emal,$course_name,$certificate_name,$tiempo) {
+function send_certificate_file(stdClass $issuedcert, $emal,$course_name,$tiempo) {
     global $CFG, $USER, $DB, $PAGE;
 
     if ($issuedcert->haschange) {
@@ -122,6 +121,6 @@ function send_certificate_file(stdClass $issuedcert, $emal,$course_name,$certifi
     //copy_content_to_temp esta en stored file
     $path = $file->copy_content_to_temp("/SICECD");
     chmod($path,777);
-    echo json_pdf_from_path($path,$emal,$course_name,$certificate_name,$tiempo);
+    echo json_pdf_from_path($path,$emal,$course_name,$tiempo);
     /*manipular el archivo(cambiar el nombre y permisos) y enviarlo*/
 }

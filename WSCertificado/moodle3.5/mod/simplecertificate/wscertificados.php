@@ -40,8 +40,9 @@ while ($i < $cantidad){
     $a = "correo".$i;
     $b = "curso".$i;
     $c = "tiempo".$i;
+    $d = "id_curso".$i;
     //echo "{$lista[$a]} "."{$lista[$b]} "."{$lista[$c]}";
-    inicio($lista[$a],$lista[$b],$lista[$c]);
+    inicio($lista[$a],$lista[$b],$lista[$c],$lista[$d]);
     $i++;
 }
 
@@ -63,10 +64,10 @@ $mysqli->close();
 * @param $nombre_curso nombre de curso
 * @param $tiempo_t tiempo de creacion de archivo a actualizar
 */
-function inicio($email,$nombre_curso,$tiempo_t){
+function inicio($email,$nombre_curso,$tiempo_t,$id_curso){
     global $arr;
-    if(!array_key_exists($nombre_curso, $arr)){
-        $arr += array($nombre_curso => array());
+    if(!array_key_exists($id_curso, $arr)){
+        $arr += array($id_curso => array());
     }
     global $mysqli;
     $resultado = $mysqli->query("SELECT * FROM mdl_user WHERE email = '{$email}';");
@@ -82,11 +83,11 @@ function inicio($email,$nombre_curso,$tiempo_t){
     $code = $row['code'];
     $tiempo = $row['timecreated'];
     $nombre_archivo = $row['certificatename'];
-    if((int)$tiempo_t >= (int)$tiempo){
+    if($tiempo_t >= $tiempo){
         return;
     }
     //echo "APLICO\n";
-    aplicar($code,$email,$nombre_curso,$nombre_archivo,$tiempo);
+    aplicar($code,$email,$nombre_curso,$nombre_archivo,$tiempo,$id_curso);
 }
 /**
 * Funcion que mete al arreglo un arreglo asociado a un certificado.
@@ -96,13 +97,13 @@ function inicio($email,$nombre_curso,$tiempo_t){
 * @param $nombre_archivo nombre de certificado
 * @param $arr arreglo que contendra la informacion de los archivos a enviar
 */
-function aplicar($code,$email,$nombre_curso,$nombre_archivo,$tiempo){
+function aplicar($code,$email,$nombre_curso,$nombre_archivo,$tiempo,$id_curso){
     global $DB;
     $issuedcert = $DB->get_record("simplecertificate_issues", array('code' => $code));
     if (!$issuedcert) {
         print_error(get_string('issuedcertificatenotfound', 'simplecertificate'));
     } else {
-        get_certificate_file($issuedcert,$email,$nombre_curso,$nombre_archivo,$tiempo);
+        get_certificate_file($issuedcert,$email,$nombre_curso,$nombre_archivo,$tiempo,$id_curso);
     }
 }
 
@@ -114,7 +115,7 @@ function aplicar($code,$email,$nombre_curso,$nombre_archivo,$tiempo){
 * @param $course_name nombre de curso
 * @param $certificate_name nombre de certificado
 */
-function get_certificate_file(stdClass $issuedcert, $emal,$course_name,$certificate_name,$tiempo) {
+function get_certificate_file(stdClass $issuedcert, $emal,$course_name,$certificate_name,$tiempo,$id_curso) {
     global $CFG, $USER, $DB, $PAGE;
 
     if ($issuedcert->haschange) {
@@ -159,8 +160,8 @@ function get_certificate_file(stdClass $issuedcert, $emal,$course_name,$certific
     chmod($path,777);
     //$base = basename($path);
     global $zip;
-    $zip->addFile($path, "{$course_name}/{$emal}/{$certificate_name}.pdf");
+    $zip->addFile($path, "{$id_curso}/{$emal}/{$certificate_name}.pdf");
     global $arr;
-    $arr[$course_name] += array("{$emal}" => $tiempo);
+    $arr[$id_curso] += array("{$emal}" => $tiempo);
     //echo "ADD to zip";
 }
