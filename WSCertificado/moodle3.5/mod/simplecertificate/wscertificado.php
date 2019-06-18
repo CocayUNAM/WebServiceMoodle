@@ -32,9 +32,14 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 //$_GET['variable']
 //$email = required_param('email',PARAM_TEXT);
 //$nombre_curso = required_param('nc',PARAM_TEXT);
-
-$nombre_curso = $_GET['nc'];
-$email = $_GET['email'];
+$clave = $_POST['clave'];
+$array_ini = parse_ini_file("webservice.ini");
+if($clave != $array_ini['clave']){
+    echo json_encode(array("mensaje" => "Error"));
+    return;
+}
+$nombre_curso = $_POST['nc'];
+$email = $_POST['email'];
 $mysqli = new mysqli('localhost','root','','moodle');
 $resultado = $mysqli->query("SELECT * FROM mdl_user WHERE email = '{$email}';");
 $id = $resultado->fetch_assoc()['id'];

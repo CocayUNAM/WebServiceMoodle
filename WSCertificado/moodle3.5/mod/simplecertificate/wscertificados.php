@@ -29,6 +29,12 @@ por nombre y correo electronico
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 header("Content-type: application/json; charset=utf-8");
 $json_p = $_POST['json'];
+$clave = $_POST['clave'];
+$array_ini = parse_ini_file("webservice.ini");
+if($clave != $array_ini['clave']){
+    echo json_encode(array("mensaje"=> "Error"));
+    return;
+}
 $lista = json_decode($json_p,true);
 $cantidad = (int)$lista['cuenta'];
 $i = 0;
