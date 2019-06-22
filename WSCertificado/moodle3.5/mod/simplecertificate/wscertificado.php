@@ -40,10 +40,16 @@ if($clave != $array_ini['clave']){
 }
 $nombre_curso = $_POST['nc'];
 $email = $_POST['email'];
-$mysqli = new mysqli('localhost','root','','moodle');
+$mysqli = new mysqli($array_ini['host'],$array_ini['user'],$array_ini['password'],$array_ini['bd']);
 $resultado = $mysqli->query("SELECT * FROM mdl_user WHERE email = '{$email}';");
+if($resultado->num_rows == 0){
+    echo json_encode(array("mensaje" => "No existe usuario"));
+}
 $id = $resultado->fetch_assoc()['id'];
 $resultado2 = $mysqli->query("SELECT * FROM mdl_simplecertificate_issues WHERE userid = {$id} AND coursename = '{$nombre_curso}';");
+if($resultado2->num_rows == 0){
+    echo json_encode(array("mensaje" => "No existe constancia"));
+}
 $row = $resultado2->fetch_assoc();
 $code = $row['code'];
 $tiempo = $row['timecreated'];

@@ -38,7 +38,7 @@ if($clave != $array_ini['clave']){
 $lista = json_decode($json_p,true);
 $cantidad = (int)$lista['cuenta'];
 $i = 0;
-$mysqli = new mysqli('localhost','root','','moodle');
+$mysqli = new mysqli($array_ini['host'],$array_ini['user'],$array_ini['password'],$array_ini['bd']);
 $zip = new ZipArchive;
 $r = $zip->open('test_folder_change.zip', ZipArchive::CREATE) === TRUE;
 $arr = array();
