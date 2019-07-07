@@ -23,7 +23,8 @@
       extract($row);
       $post_item = array(
         'fullname'=>$fullname,
-        'username'=>$username
+        'username'=>$username,
+        'grade'=>$grade
       );
       // Push to "data"
       array_push($posts_arr, $post_item);
