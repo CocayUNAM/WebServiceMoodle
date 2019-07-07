@@ -1,10 +1,17 @@
 <?php
   // Headers
-  header('Access-Control-Allow-Origin: *');
+  
   header('Content-Type: application/json');
   header("Content-type: application/json; charset=utf-8");
+
   include_once '../../config/Database.php';
   include_once '../../models/Users.php';
+  $clave = $_GET['clave'];
+  $array_ini = parse_ini_file("webservice.ini");
+  if($clave != $array_ini['clave']){
+    echo json_encode(array("mensaje" => "Error"));
+    return;
+  }
   // Instantiate DB & connect
   $database = new Database();
   $db = $database->connect();
