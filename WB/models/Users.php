@@ -11,13 +11,7 @@
     // Get Users
     public function read() {
       // Create query
-      $query = "SELECT DISTINCT u.username, u.firstname, u.lastname, u.email, u.institution, u.city, rl.shortname, ag.grade
-      FROM mdl_user u INNER JOIN mdl_user_enrolments ue ON ue.userid = u.id
-      INNER JOIN mdl_assign_grades ag ON ue.userid = ag.userid
-      INNER JOIN mdl_role_assignments ass ON u.id = ass.userid
-      INNER JOIN mdl_role rl ON rl.id = ass.roleid
-      WHERE rl.shortname='student' AND
-      ag.grade=(select max(grade) from mdl_assign_grades as f where ue.userid = f.userid) ORDER BY u.lastname, u.firstname";
+      $query = "SELECT DISTINCT us.username,us.firstname, us.lastname, us.email, us.institution, us.city, rl.shortname,cou.fullname, cou.id ,ag.grade FROM mdl_role_assignments ass INNER JOIN mdl_context con on ass.contextid = con.id INNER JOIN mdl_course cou on con.instanceid = cou.id INNER JOIN mdl_user us on ass.userid = us.id INNER JOIN mdl_user_enrolments ue ON ue.userid = us.id INNER JOIN mdl_assign_grades ag ON ue.userid = ag.userid INNER JOIN mdl_role rl ON rl.id = ass.roleid WHERE rl.shortname='student' AND ag.grade=(select max(grade) from mdl_assign_grades as f where ue.userid = f.userid) ORDER BY us.lastname, us.firstname";
       // Prepare statement
       $stmt = $this->conn->prepare($query);
       // Execute query

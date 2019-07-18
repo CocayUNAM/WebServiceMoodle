@@ -7,7 +7,7 @@
   include_once '../../config/Database.php';
   include_once '../../models/Users.php';
   $clave = $_GET['clave'];
-  $array_ini = parse_ini_file("webservice.ini");
+  $array_ini = parse_ini_file("pass.ini");
   if($clave != $array_ini['clave']){
     echo json_encode(array("mensaje" => "Error"));
     return;
@@ -36,7 +36,9 @@
         'institution' => $institution,
         'city' => $city,
         'shortname'=>$shortname,
-        'grade'=>$grade
+        'grade'=>$grade,
+        'id'=>$id,
+        'fullname'=>$fullname
       );
       // Push to "data"
       array_push($posts_arr, $post_item);

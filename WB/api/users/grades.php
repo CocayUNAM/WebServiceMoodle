@@ -1,10 +1,19 @@
 <?php
   // Headers
-  header('Access-Control-Allow-Origin: *');
+  
   header('Content-Type: application/json');
   header("Content-type: application/json; charset=utf-8");
+
   include_once '../../config/Database.php';
-  include_once '../../models/Course.php';
+  include_once '../../models/Grades.php';
+
+
+ $clave = $_GET['clave'];
+  $array_ini = parse_ini_file("pass.ini");
+  if($clave != $array_ini['clave']){
+    echo json_encode(array("mensaje" => "Error se necesita identificacion"));
+    return;
+  }
   // Instantiate DB & connect
   $database = new Database();
   $db = $database->connect();
@@ -22,9 +31,10 @@
     while($row = $result->fetch(PDO::FETCH_ASSOC)) {
       extract($row);
       $post_item = array(
-        'fullname'=>$fullname,
+        'grade'=>$grade,
+        'shortname'=>$shortname,
         'username'=>$username,
-        'grade'=>$grade
+        'idnumber'=>$idnumber,
       );
       // Push to "data"
       array_push($posts_arr, $post_item);
@@ -34,6 +44,7 @@
   } else {
     // No Users
     echo json_encode(
-      array('message' => 'No Users Found')
+      array('message' => 'No Grades Found')
     );
   }
+
