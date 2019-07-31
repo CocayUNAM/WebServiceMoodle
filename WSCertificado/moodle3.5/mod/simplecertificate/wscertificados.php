@@ -38,17 +38,16 @@ if($clave != $array_ini['clave']){
 $lista = json_decode($json_p,true);
 $cantidad = (int)$lista['cuenta'];
 $i = 0;
-$mysqli = new mysqli($array_ini['host'],$array_ini['user'],$array_ini['password'],$array_ini['bd']);
+$mysqli = new mysqli($CFG->dbhost,$CFG->dbuser,$CFG->dbpass,$CFG->dbname);
 $zip = new ZipArchive;
 $r = $zip->open('test_folder_change.zip', ZipArchive::CREATE) === TRUE;
 $arr = array();
 while ($i < $cantidad){
     $a = "correo".$i;
-    $b = "curso".$i;
     $c = "tiempo".$i;
     $d = "id_curso".$i;
     //echo "{$lista[$a]} "."{$lista[$b]} "."{$lista[$c]}";
-    inicio($lista[$a],$lista[$b],$lista[$c],$lista[$d]);
+    inicio($lista[$a],$lista[$c],$lista[$d]);
     $i++;
 }
 
@@ -70,7 +69,7 @@ $mysqli->close();
 * @param $nombre_curso nombre de curso
 * @param $tiempo_t tiempo de creacion de archivo a actualizar
 */
-function inicio($email,$nombre_curso,$tiempo_t,$id_curso){
+function inicio($email,$tiempo_t,$id_curso){
     global $arr;
     if(!array_key_exists($id_curso, $arr)){
         $arr += array($id_curso => array());
@@ -81,7 +80,15 @@ function inicio($email,$nombre_curso,$tiempo_t,$id_curso){
         return;
     }
     $id = $resultado->fetch_assoc()['id'];
-    $resultado2 = $mysqli->query("SELECT * FROM mdl_simplecertificate_issues WHERE userid = {$id} AND coursename = '{$nombre_curso}';");
+    $mivar = explode("|",$id_curso)
+
+    $resultado3 = $mysqli->query("SELECT * FROM mdl_course WHERE idnumber = '{$mivar[0]}';");
+    if($resultado3->num_rows == 0){
+        return;
+    }
+    $nc = $resultado3->fetch_assoc()['fullname'];
+
+    $resultado2 = $mysqli->query("SELECT * FROM mdl_simplecertificate_issues WHERE userid = {$id} AND coursename = '{$nc}';");
     if($resultado2->num_rows == 0){
         return;
     }
@@ -93,7 +100,7 @@ function inicio($email,$nombre_curso,$tiempo_t,$id_curso){
         return;
     }
     //echo "APLICO\n";
-    aplicar($code,$email,$nombre_curso,$nombre_archivo,$tiempo,$id_curso);
+    aplicar($code,$email,$nombre_archivo,$tiempo,$id_curso);
 }
 /**
 * Funcion que mete al arreglo un arreglo asociado a un certificado.
@@ -103,13 +110,13 @@ function inicio($email,$nombre_curso,$tiempo_t,$id_curso){
 * @param $nombre_archivo nombre de certificado
 * @param $arr arreglo que contendra la informacion de los archivos a enviar
 */
-function aplicar($code,$email,$nombre_curso,$nombre_archivo,$tiempo,$id_curso){
+function aplicar($code,$email,$nombre_archivo,$tiempo,$id_curso){
     global $DB;
     $issuedcert = $DB->get_record("simplecertificate_issues", array('code' => $code));
     if (!$issuedcert) {
         print_error(get_string('issuedcertificatenotfound', 'simplecertificate'));
     } else {
-        get_certificate_file($issuedcert,$email,$nombre_curso,$nombre_archivo,$tiempo,$id_curso);
+        get_certificate_file($issuedcert,$email,$nombre_archivo,$tiempo,$id_curso);
     }
 }
 
@@ -118,10 +125,9 @@ function aplicar($code,$email,$nombre_curso,$nombre_archivo,$tiempo,$id_curso){
 * Funcion que envía un certificado codificado en un json
 * @param $issuedcert clase asociada a un certificado expedido o por expedir
 * @param $emal correo de usuario
-* @param $course_name nombre de curso
 * @param $certificate_name nombre de certificado
 */
-function get_certificate_file(stdClass $issuedcert, $emal,$course_name,$certificate_name,$tiempo,$id_curso) {
+function get_certificate_file(stdClass $issuedcert, $emal,$certificate_name,$tiempo,$id_curso) {
     global $CFG, $USER, $DB, $PAGE;
 
     if ($issuedcert->haschange) {

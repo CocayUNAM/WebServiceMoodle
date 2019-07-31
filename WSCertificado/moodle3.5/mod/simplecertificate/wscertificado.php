@@ -40,13 +40,22 @@ if($clave != $array_ini['clave']){
 }
 $nombre_curso = $_POST['nc'];
 $email = $_POST['email'];
-$mysqli = new mysqli($array_ini['host'],$array_ini['user'],$array_ini['password'],$array_ini['bd']);
+$mysqli = new mysqli($CFG->dbhost,$CFG->dbuser ,$CFG->dbpass,$CFG->dbname);
+
 $resultado = $mysqli->query("SELECT * FROM mdl_user WHERE email = '{$email}';");
 if($resultado->num_rows == 0){
     echo json_encode(array("mensaje" => "No existe usuario"));
 }
 $id = $resultado->fetch_assoc()['id'];
-$resultado2 = $mysqli->query("SELECT * FROM mdl_simplecertificate_issues WHERE userid = {$id} AND coursename = '{$nombre_curso}';");
+$codigo = explode("|",$nombre_curso);
+
+$resultado3 = $mysqli->query("SELECT * FROM mdl_course WHERE idnumber = '{$codigo[0]}';");
+if($resultado3->num_rows == 0){
+    echo json_encode(array("mensaje" => "No existe curso"));
+}
+$nc = $resultado3->fetch_assoc()['fullname'];
+
+$resultado2 = $mysqli->query("SELECT * FROM mdl_simplecertificate_issues WHERE userid = {$id} AND coursename = '{$nc}';");
 if($resultado2->num_rows == 0){
     echo json_encode(array("mensaje" => "No existe constancia"));
 }
