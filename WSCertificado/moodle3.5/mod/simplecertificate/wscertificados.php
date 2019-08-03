@@ -39,6 +39,7 @@ $lista = json_decode($json_p,true);
 $cantidad = (int)$lista['cuenta'];
 $i = 0;
 $mysqli = new mysqli($CFG->dbhost,$CFG->dbuser,$CFG->dbpass,$CFG->dbname);
+$mysqli->query("SET character_set_results = 'utf8', character_set_client = 'utf8', character_set_connection = 'utf8', character_set_database = 'utf8', character_set_server = 'utf8'");
 $zip = new ZipArchive;
 $r = $zip->open('test_folder_change.zip', ZipArchive::CREATE) === TRUE;
 $arr = array();
@@ -52,7 +53,7 @@ while ($i < $cantidad){
 }
 
 $zip->close();
-$handle = fopen('test_folder_change.zip', 'rt');
+$handle = fopen('test_folder_change.zip', 'rb');
 $size = filesize('test_folder_change.zip');
 $content = fread($handle,$size);
 $content = base64_encode($content);
@@ -61,6 +62,7 @@ if(count($arr) == 0){
 } else {
     echo json_encode(array("zip" => $content) + $arr + array("mensaje" => "NULL"));
 }
+fclose($handle);
 unlink('test_folder_change.zip');
 $mysqli->close();
 /**
@@ -95,6 +97,13 @@ function inicio($email,$tiempo_t,$id_curso){
     $code = $row['code'];
     $tiempo = $row['timecreated'];
     $nombre_archivo = $row['certificatename'];
+    $unwanted_array = array('Š'=>'S', 'š'=>'s', 'Ž'=>'Z', 'ž'=>'z', 'À'=>'A', 'Á'=>'A', 'Â'=>'A', 'Ã'=>'A', 'Ä'=>'A', 'Å'=>'A', 'Æ'=>'A', 'Ç'=>'C', 'È'=>'E', 'É'=>'E',
+                            'Ê'=>'E', 'Ë'=>'E', 'Ì'=>'I', 'Í'=>'I', 'Î'=>'I', 'Ï'=>'I', 'Ñ'=>'N', 'Ò'=>'O', 'Ó'=>'O', 'Ô'=>'O', 'Õ'=>'O', 'Ö'=>'O', 'Ø'=>'O', 'Ù'=>'U',
+                            'Ú'=>'U', 'Û'=>'U', 'Ü'=>'U', 'Ý'=>'Y', 'Þ'=>'B', 'ß'=>'Ss', 'à'=>'a', 'á'=>'a', 'â'=>'a', 'ã'=>'a', 'ä'=>'a', 'å'=>'a', 'æ'=>'a', 'ç'=>'c',
+                            'è'=>'e', 'é'=>'e', 'ê'=>'e', 'ë'=>'e', 'ì'=>'i', 'í'=>'i', 'î'=>'i', 'ï'=>'i', 'ð'=>'o', 'ñ'=>'n', 'ò'=>'o', 'ó'=>'o', 'ô'=>'o', 'õ'=>'o',
+                            'ö'=>'o', 'ø'=>'o', 'ù'=>'u', 'ú'=>'u', 'û'=>'u', 'ý'=>'y', 'þ'=>'b', 'ÿ'=>'y' );
+    $nombre_archivo = strtr( $nombre_archivo, $unwanted_array );
+
     if($tiempo_t >= $tiempo){
         return;
     }
