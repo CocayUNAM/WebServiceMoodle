@@ -80,9 +80,8 @@ function inicio($email,$tiempo_t,$id_curso){
         return;
     }
     $id = $resultado->fetch_assoc()['id'];
-    $mivar = explode("|",$id_curso)
 
-    $resultado3 = $mysqli->query("SELECT * FROM mdl_course WHERE idnumber = '{$mivar[0]}';");
+    $resultado3 = $mysqli->query("SELECT * FROM mdl_course WHERE idnumber = '{$id_curso}';");
     if($resultado3->num_rows == 0){
         return;
     }

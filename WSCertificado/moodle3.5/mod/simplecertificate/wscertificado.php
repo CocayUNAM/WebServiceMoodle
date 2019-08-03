@@ -47,9 +47,8 @@ if($resultado->num_rows == 0){
     echo json_encode(array("mensaje" => "No existe usuario"));
 }
 $id = $resultado->fetch_assoc()['id'];
-$codigo = explode("|",$nombre_curso);
 
-$resultado3 = $mysqli->query("SELECT * FROM mdl_course WHERE idnumber = '{$codigo[0]}';");
+$resultado3 = $mysqli->query("SELECT * FROM mdl_course WHERE idnumber = '{$nombre_curso}';");
 if($resultado3->num_rows == 0){
     echo json_encode(array("mensaje" => "No existe curso"));
 }
