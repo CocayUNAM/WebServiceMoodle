@@ -4,11 +4,11 @@
     
     
     // DB Params
-    //private $host = 'localhost';
-    //private $db_name = 'moodle35';
+    private $host = 'localhost';
+    private $db_name = 'moodle35';
     private $port='8889';
-    //private $username = 'root';
-    //private $password = 'root';
+    private $username = 'root';
+    private $password = 'root';
     private $conn;
 
     // DB Connect
