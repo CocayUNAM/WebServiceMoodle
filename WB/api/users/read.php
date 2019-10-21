@@ -34,11 +34,7 @@
         'lastname' => $lastname,
         'email' => $email,
         'institution' => $institution,
-        'city' => $city,
-        'shortname'=>$shortname,
-        'grade'=>$grade,
-        'id'=>$id,
-        'fullname'=>$fullname
+        'city' => $city
       );
       // Push to "data"
       array_push($posts_arr, $post_item);
