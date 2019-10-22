@@ -48,7 +48,7 @@ if($resultado->num_rows == 0){
 }
 $id = $resultado->fetch_assoc()['id'];
 
-$resultado3 = $mysqli->query("SELECT * FROM mdl_course WHERE idnumber = '{$nombre_curso}' AND LIKE '%\_%';");
+$resultado3 = $mysqli->query("SELECT * FROM mdl_course WHERE idnumber = '{$nombre_curso}' AND idnumber LIKE '%\_%';");
 if($resultado3->num_rows == 0){
     echo json_encode(array("mensaje" => "No existe curso"));
 }
