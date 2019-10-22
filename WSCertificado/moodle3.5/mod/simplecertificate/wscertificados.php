@@ -83,7 +83,7 @@ function inicio($email,$tiempo_t,$id_curso){
     }
     $id = $resultado->fetch_assoc()['id'];
 
-    $resultado3 = $mysqli->query("SELECT * FROM mdl_course WHERE idnumber = '{$id_curso}';");
+    $resultado3 = $mysqli->query("SELECT * FROM mdl_course WHERE idnumber = '{$id_curso}' AND LIKE '%\_%';");
     if($resultado3->num_rows == 0){
         return;
     }
