@@ -9,7 +9,7 @@
     // Get Users
     public function read() {
       // Create query
-      $query = "SELECT cou.shortname,cou.idnumber FROM mdl_course cou";
+      $query = "SELECT cou.shortname, cou.idnumber FROM mdl_course cou WHERE cou.idnumber LIKE '%\_%'";
       // Prepare statement
       $stmt = $this->conn->prepare($query);
       // Execute query
