@@ -27,20 +27,23 @@
   if($num > 0) {
     // User array
     $posts_arr = array();
+    $posts_arr_final = array();
     // $posts_arr['data'] = array();
     while($row = $result->fetch(PDO::FETCH_ASSOC)) {
       extract($row);
-      $post_item = array(
-        'grade'=>$grade,
-        'shortname'=>$shortname,
-        'username'=>$username,
-        'idnumber'=>$idnumber,
-      );
+      $post_group=array('shortname'=>$shortname,'idnumber'=>$idnumber,);
+      $post_item = array('grade'=>$grade,'username'=>$username,);
+      $posts_arr_final = array_unique($post_group);
       // Push to "data"
       array_push($posts_arr, $post_item);
+      //array_push($posts_arr, $post_group);
+     
     }
+     array_push($posts_arr,$posts_arr_final);
+     $reversed = array_reverse($posts_arr);
     // Convert to Json with UTF-8
-    echo json_encode($posts_arr,JSON_UNESCAPED_UNICODE);
+   // echo json_encode($posts_arr,JSON_UNESCAPED_UNICODE);
+    echo json_encode($reversed,JSON_UNESCAPED_UNICODE);
   } else {
     // No Users
     echo json_encode(
@@ -48,3 +51,19 @@
     );
   }
 
+
+
+  function unique_multidim_array($array, $key) {
+    $temp_array = array();
+    $i = 0;
+    $key_array = array();
+   
+    foreach($array as $val) {
+        if (!in_array($val[$key], $key_array)) {
+            $key_array[$i] = $val[$key];
+            $temp_array[$i] = $val;
+        }
+        $i++;
+    }
+    return $temp_array;
+}
